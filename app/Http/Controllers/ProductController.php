@@ -10,7 +10,7 @@ class ProductController extends Controller
 {
     public function index()
     {
-        return Product::all();
+        return response()->json(Product::all(), 200);
     }
 
     public function store(Request $request)
@@ -26,9 +26,15 @@ class ProductController extends Controller
         return response()->json($product, 201);
     }
 
-    public function show(Product $product)
+    public function show(string $id) // $id is came from 'products/{id}' route
     {
+      $product = Product::find($id); // Attempt to find a Product by its ID
+
+      if ($product) { // Check if the product exists
         return response()->json($product, 200);
+      } else {
+        return response()->json(['message' => 'Product not found'], 404);
+      }
     }
 
     public function update(Request $request, Product $product)
@@ -39,15 +45,21 @@ class ProductController extends Controller
             'price' => 'required|numeric',
         ]);
 
-        $product->update($validated);
-
-        return response()->json($product, 200);
+        if ($product) {
+            $product->update($validated);
+            return response()->json($product, 200);
+        } else {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
     }
 
     public function destroy(Product $product)
     {
-        $product->delete();
-
-        return response('Deleted', 200);
+        if ($product) {
+            $product->delete();
+            return response()->json(null, 204);
+        } else {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
     }
 }
