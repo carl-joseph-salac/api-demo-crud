@@ -11,7 +11,7 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'require|string|max:255',
+            'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required'
         ]);
@@ -19,7 +19,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password)
+            'password' => bcrypt($request->password) // Hash
         ]);
 
         return response()->json(['user' => $user], 201);
@@ -50,7 +50,8 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         // Retrieve the authenticated user's current access token and delete it
-        $request->user()->token()->delete();
+        // used currenAccessToken() instead of token()
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logged out']);
     }
